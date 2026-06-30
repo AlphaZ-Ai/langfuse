@@ -90,6 +90,24 @@ services:
       LANGFUSE_INIT_USER_PASSWORD: ${LANGFUSE_INIT_USER_PASSWORD:-}
       CLICKHOUSE_DISABLE_LAZY_MATERIALIZATION: true
 
+  gadm-eval:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - langfuse-web
+    ports:
+      - 127.0.0.1:8000:8000
+    environment:
+      BASE_URL: ${BASE_URL}
+      X_API_KEY: ${X_API_KEY}
+      LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY}
+      LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY}
+      LANGFUSE_BASE_URL: ${LANGFUSE_BASE_URL:-http://langfuse-web:3000}
+      LANGFUSE_TRACING_ENVIRONMENT: ${LANGFUSE_TRACING_ENVIRONMENT:-staging}
+      GADM_REMOTE_EXPERIMENT_SECRET: ${GADM_REMOTE_EXPERIMENT_SECRET:-test} # CHANGEME: set a secret to authenticate webhook calls
+
   clickhouse:
     image: docker.io/clickhouse/clickhouse-server:25.8
     restart: always
