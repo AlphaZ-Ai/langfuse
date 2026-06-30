@@ -69,6 +69,7 @@ services:
       EMAIL_FROM_ADDRESS: ${EMAIL_FROM_ADDRESS:-}
       SMTP_CONNECTION_URL: ${SMTP_CONNECTION_URL:-}
       CLICKHOUSE_DISABLE_LAZY_MATERIALIZATION: true
+      LANGFUSE_WEBHOOK_WHITELISTED_HOST: gadm-eval
 
   langfuse-web:
     image: docker.io/langfuse/langfuse:3
@@ -97,8 +98,6 @@ services:
     restart: always
     depends_on:
       - langfuse-web
-    ports:
-      - 127.0.0.1:8000:8000
     environment:
       BASE_URL: ${BASE_URL}
       X_API_KEY: ${X_API_KEY}
@@ -106,7 +105,19 @@ services:
       LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY}
       LANGFUSE_BASE_URL: ${LANGFUSE_BASE_URL:-http://langfuse-web:3000}
       LANGFUSE_TRACING_ENVIRONMENT: ${LANGFUSE_TRACING_ENVIRONMENT:-staging}
-      GADM_REMOTE_EXPERIMENT_SECRET: ${GADM_REMOTE_EXPERIMENT_SECRET:-test} # CHANGEME: set a secret to authenticate webhook calls
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:80/health')",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
 
   clickhouse:
     image: docker.io/clickhouse/clickhouse-server:25.8
@@ -197,3 +208,4 @@ volumes:
     driver: local
   langfuse_redis_data:
     driver: local
+
