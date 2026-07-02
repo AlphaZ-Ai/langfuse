@@ -97,12 +97,15 @@ services:
     build:
       context: ${GADM_EVAL_PATH}
       dockerfile: Dockerfile
+      additional_contexts:
+        gadm_models: ${GADM_MODELS_PATH}
     restart: always
     depends_on:
       - langfuse-web
     volumes:
       - ${GADM_EVAL_PATH}/src:/app/src
       - ${GADM_EVAL_PATH}/tests:/app/tests
+      - ${GADM_MODELS_PATH}/src:/gadm_models/src
     environment:
       BASE_URL: ${BASE_URL}
       TEST_BASE_URL: ${TEST_BASE_URL}
@@ -112,6 +115,7 @@ services:
       LANGFUSE_BASE_URL: ${LANGFUSE_BASE_URL:-http://langfuse-web:9999}
       LANGFUSE_TRACING_ENVIRONMENT: ${LANGFUSE_TRACING_ENVIRONMENT:-staging}
       GADM_SCENARIOS_DIR: /app/tests/scenarios
+      GADM_MODELS_DIR: /gadm_models
     healthcheck:
       test:
         [

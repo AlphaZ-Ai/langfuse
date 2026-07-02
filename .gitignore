@@ -53,6 +53,7 @@ yarn-error.log*
 !.env.test.example
 !.env.dev-oci.example
 !.env.alphaz.example
+!.env.debug.example
 
 # vercel
 .vercel
