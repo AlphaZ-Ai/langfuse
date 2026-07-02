@@ -5,10 +5,6 @@
 # External connections from other machines will not be able to reach these services directly.
 name: langfuse-debug
 
-secrets:
-  github_token:
-    environment: GITHUB_TOKEN
-
 services:
   langfuse-worker:
     image: docker.io/langfuse/langfuse-worker:3
@@ -23,7 +19,7 @@ services:
       clickhouse:
         condition: service_healthy
     ports:
-      - 127.0.0.1:3030:3030
+      - 127.0.0.1:3031:3031
     environment: &langfuse-worker-env
       NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:9999}
       DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/postgres} # CHANGEME
@@ -82,7 +78,7 @@ services:
     restart: always
     depends_on: *langfuse-depends-on
     ports:
-      - 9999:9999
+      - 9999:3000
     environment:
       <<: *langfuse-worker-env
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-mysecret} # CHANGEME
@@ -99,13 +95,14 @@ services:
 
   gadm-eval:
     build:
-      context: ./gadm_eval
+      context: ${GADM_EVAL_PATH}
       dockerfile: Dockerfile
-      secrets:
-        - github_token
     restart: always
     depends_on:
       - langfuse-web
+    volumes:
+      - ${GADM_EVAL_PATH}/src:/app/src
+      - ${GADM_EVAL_PATH}/tests:/app/tests
     environment:
       BASE_URL: ${BASE_URL}
       TEST_BASE_URL: ${TEST_BASE_URL}
