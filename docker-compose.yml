@@ -3,6 +3,10 @@
 # In addition, we recommend to restrict inbound traffic on the host to langfuse-web (port 3000) and minio (port 9090) only.
 # All other components are bound to localhost (127.0.0.1) to only accept connections from the local machine.
 # External connections from other machines will not be able to reach these services directly.
+secrets:
+  github_token:
+    environment: GITHUB_TOKEN
+
 services:
   langfuse-worker:
     image: docker.io/langfuse/langfuse-worker:3
@@ -93,8 +97,10 @@ services:
 
   gadm-eval:
     build:
-      context: ../..
+      context: ./gadm_eval
       dockerfile: Dockerfile
+      secrets:
+        - github_token
     restart: always
     depends_on:
       - langfuse-web
@@ -106,9 +112,7 @@ services:
       LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY}
       LANGFUSE_BASE_URL: ${LANGFUSE_BASE_URL:-http://langfuse-web:3000}
       LANGFUSE_TRACING_ENVIRONMENT: ${LANGFUSE_TRACING_ENVIRONMENT:-staging}
-      GADM_SCENARIOS_DIR: /scenarios
-    volumes:
-      - ../../tests/scenarios:/scenarios:ro
+      GADM_SCENARIOS_DIR: /app/tests/scenarios
     healthcheck:
       test:
         [
