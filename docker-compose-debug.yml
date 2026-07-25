@@ -1,6 +1,6 @@
 # Make sure to update the credential placeholders with your own secrets.
 # We mark them with # CHANGEME in the file below.
-# In addition, we recommend to restrict inbound traffic on the host to langfuse-web (port 9999) and minio (port 9090) only.
+# In addition, we recommend to restrict inbound traffic on the host to langfuse-web (port 9999), minio (port 9090), and gadm-webui (port 4354) only.
 # All other components are bound to localhost (127.0.0.1) to only accept connections from the local machine.
 # External connections from other machines will not be able to reach these services directly.
 name: langfuse-debug
@@ -129,6 +129,26 @@ services:
       retries: 5
       start_period: 10s
 
+  gadm-webui:
+    build:
+      context: ${GADM_EVAL_PATH}
+      dockerfile: Dockerfile.webui
+      additional_contexts:
+        gadm_models: ${GADM_MODELS_PATH}
+      args:
+        UID: ${GADM_WEBUI_UID:-1000}
+        GID: ${GADM_WEBUI_GID:-1000}
+    restart: always
+    ports:
+      - 4354:80
+    volumes:
+      - ${GADM_EVAL_PATH}/src:/app/src
+      - ${GADM_EVAL_PATH}/tests:/app/tests
+      - ${GADM_MODELS_PATH}/src:/gadm_models/src
+    environment:
+      BASE_URL: ${BASE_URL}
+      TEST_BASE_URL: ${TEST_BASE_URL}
+      X_API_KEY: ${X_API_KEY}
 
   clickhouse:
     image: docker.io/clickhouse/clickhouse-server:25.8
