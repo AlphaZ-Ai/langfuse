@@ -8,3 +8,4 @@ fi
 source .env.debug
 docker compose -f docker-compose-debug.yml up -d langfuse-web
 docker compose -f docker-compose-debug.yml up --build -d gadm-eval
+docker compose -f docker-compose-debug.yml up --build -d gadm-webui
