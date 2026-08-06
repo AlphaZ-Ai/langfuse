@@ -95,6 +95,29 @@ services:
       LANGFUSE_INIT_USER_PASSWORD: ${LANGFUSE_INIT_USER_PASSWORD:-}
       CLICKHOUSE_DISABLE_LAZY_MATERIALIZATION: true
 
+  # Gives prod its own Tailscale MagicDNS hostname (distinct from the host's
+  # own tailscale0 identity used by debug), so their auth cookies never
+  # collide in the browser. Shares langfuse-web's network namespace so it can
+  # reach it at 127.0.0.1:3000.
+  tailscale-langfuse-prod:
+    image: tailscale/tailscale:latest
+    container_name: langfuse-prod-tailscale
+    network_mode: service:langfuse-web
+    depends_on:
+      - langfuse-web
+    environment:
+      - TS_HOSTNAME=langfuse-prod
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_USERSPACE=false
+    volumes:
+      - ./tailscale/langfuse-prod-state:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - net_admin
+      - sys_module
+    restart: unless-stopped
+    tty: true # keeps the container open for the one-time interactive `tailscale up` login
+
   gadm-eval:
     build:
       context: ./gadm_eval
