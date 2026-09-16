@@ -121,3 +121,5 @@ web/test-results/*
 .superset/
 .vscode/
 tailscale/
+
+data/
