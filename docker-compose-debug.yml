@@ -5,10 +5,18 @@
 # External connections from other machines will not be able to reach these services directly.
 name: langfuse-debug
 
+# Cap container stdout/stderr logs so they cannot fill the disk.
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   langfuse-worker:
     image: docker.io/langfuse/langfuse-worker:3
     restart: always
+    logging: *default-logging
     depends_on: &langfuse-depends-on
       postgres:
         condition: service_healthy
@@ -76,6 +84,7 @@ services:
   langfuse-web:
     image: docker.io/langfuse/langfuse:3
     restart: always
+    logging: *default-logging
     depends_on: *langfuse-depends-on
     ports:
       - 9999:3000
@@ -100,6 +109,7 @@ services:
       additional_contexts:
         gadm_models: ${GADM_MODELS_PATH}
     restart: always
+    logging: *default-logging
     depends_on:
       - langfuse-web
     volumes:
@@ -139,6 +149,7 @@ services:
         UID: ${GADM_WEBUI_UID:-1000}
         GID: ${GADM_WEBUI_GID:-1000}
     restart: always
+    logging: *default-logging
     ports:
       - 4354:80
     volumes:
@@ -153,6 +164,7 @@ services:
   clickhouse:
     image: docker.io/clickhouse/clickhouse-server:25.8
     restart: always
+    logging: *default-logging
     user: "101:101"
     environment:
       CLICKHOUSE_DB: default
@@ -171,6 +183,7 @@ services:
   minio:
     image: cgr.dev/chainguard/minio
     restart: always
+    logging: *default-logging
     entrypoint: sh
     # create the 'langfuse' bucket before starting the service
     command: -c 'mkdir -p /data/langfuse && minio server --address ":9000" --console-address ":9001" /data'
@@ -194,6 +207,7 @@ services:
   redis:
     image: docker.io/redis:7
     restart: always
+    logging: *default-logging
     # CHANGEME: row below to secure redis password
     command: >
       --requirepass ${REDIS_AUTH:-myredissecret}
@@ -209,6 +223,7 @@ services:
   postgres:
     image: docker.io/postgres:${POSTGRES_VERSION:-17}
     restart: always
+    logging: *default-logging
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 3s
