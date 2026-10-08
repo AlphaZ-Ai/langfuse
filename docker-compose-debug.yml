@@ -156,10 +156,20 @@ services:
       - ${GADM_EVAL_PATH}/src:/app/src
       - ${GADM_EVAL_PATH}/tests:/app/tests
       - ${GADM_MODELS_PATH}/src:/gadm_models/src
+      # VLM labels tab: reuse the host's HF download cache (the AlphaZai/vlm_eval
+      # kit) and persist the resized frames in data/vlm_eval_frames.
+      - ${HOME}/.cache/huggingface/hub:/home/appuser/.cache/huggingface/hub
+      - ${GADM_EVAL_PATH}/data:/app/data
     environment:
       BASE_URL: ${BASE_URL}
       TEST_BASE_URL: ${TEST_BASE_URL}
       X_API_KEY: ${X_API_KEY}
+      # VLM labels tab: HF_TOKEN reads the private kit; LANGFUSE_* for "Push labels to Langfuse".
+      HF_TOKEN: ${HF_TOKEN}
+      LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY}
+      LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY}
+      LANGFUSE_BASE_URL: ${LANGFUSE_BASE_URL:-http://langfuse-web:9999}
+      LANGFUSE_TRACING_ENVIRONMENT: ${LANGFUSE_TRACING_ENVIRONMENT:-staging}
 
   clickhouse:
     image: docker.io/clickhouse/clickhouse-server:25.8
