@@ -124,10 +124,11 @@ services:
       - TS_STATE_DIR=/var/lib/tailscale
       - TS_USERSPACE=false
       - TS_SERVE_CONFIG=/config/serve.json
-      # First join needs TS_AUTHKEY (in .env.debug): the image's startup gives
-      # an interactive login only 60s before restarting with a new URL.
-      # TS_AUTH_ONCE skips re-login once ./tailscale/langfuse-debug-state exists,
-      # so the key can be removed or expire after the first start.
+      # First join: the image's startup kills an unapproved interactive login
+      # after 60s and restarts with a new URL. Either set TS_AUTHKEY, or approve
+      # a URL from `docker logs -f langfuse-debug-tailscale` within that window.
+      # Once ./tailscale/langfuse-debug-state holds an approved node,
+      # TS_AUTH_ONCE skips login on later starts.
       - TS_AUTHKEY=${TS_AUTHKEY:-}
       - TS_AUTH_ONCE=true
     volumes:
