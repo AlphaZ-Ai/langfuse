@@ -110,7 +110,9 @@ services:
   # the same session cookie name, so debug and another Langfuse on the same
   # host IP (e.g. maestro-bench on :3100) would keep logging each other out.
   # Shares langfuse-web's network namespace so it can reach it at
-  # 127.0.0.1:3000; the serve rule lives in tailscale-debug-serve.json.
+  # langfuse-web:3000 (Langfuse binds the container address, not loopback);
+  # the serve rule lives in tailscale-debug-serve.json, keyed on the node names
+  # because this tailnet has no HTTPS certs (TS_CERT_DOMAIN would be "no-https").
   tailscale-langfuse-debug:
     image: tailscale/tailscale:latest
     container_name: langfuse-debug-tailscale
